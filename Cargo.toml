@@ -1,0 +1,8 @@
+[package]
+name = "sas_run"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.100"
+winreg = "0.55.0"
