@@ -2,6 +2,11 @@
 name = "sas_run"
 version = "0.1.0"
 edition = "2024"
+authors = ["ticktock"]
+description = "用于windows下读取注册表中的SAS路径来执行指定的SAS程序文件"
+documentation = "https://docs.rs/sas_run"
+readme = "readme.md"
+license = "MIT"
 
 [dependencies]
 anyhow = "1.0.100"
