@@ -7,6 +7,7 @@ description = "用于windows下读取注册表中的SAS路径来执行指定的S
 documentation = "https://docs.rs/sas_run"
 readme = "readme.md"
 license = "MIT"
+keywords = ["sas"]
 
 [dependencies]
 anyhow = "1.0.100"
