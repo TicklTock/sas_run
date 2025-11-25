@@ -1,8 +1,21 @@
 use std::path::{Path, PathBuf};
-use std::{os::windows::process::CommandExt, process::Command};
+use std::{os::windows::process::CommandExt, process::Command, fmt::Debug};
+use thiserror::Error;
 use winreg::enums::*;
 use winreg::RegKey;
 
+
+#[derive(Error)]
+pub enum SasError {
+    #[error(transparent)]
+    IoError(#[from] std::io::Error),
+}
+
+impl Debug for SasError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self)
+    }
+}
 
 pub enum Encoding {
     UTF8,
@@ -35,9 +48,17 @@ impl Sas {
         };
         Self { cmd: Command::new("cmd.exe"), config_path: config_path, sas_path: sas_path.as_ref().to_path_buf(), log_path }
     }
-    pub fn run(&mut self) -> anyhow::Result<()> {
+    pub fn run(&mut self) -> Result<(), SasError> {
         let config_path = self.config_path.to_str().unwrap();
         let sas_path = self.sas_path.to_str().unwrap();
+
+        if !std::fs::exists(config_path)? {
+            return Err(SasError::IoError(std::io::Error::new(std::io::ErrorKind::NotFound, format!("SAS config file not found: {}", config_path))));
+        }
+
+        if !std::fs::exists(sas_path)? {
+            return Err(SasError::IoError(std::io::Error::new(std::io::ErrorKind::NotFound, format!("SAS file not found: {}", sas_path))));
+        }
 
         let log_args = {
             if self.log_path.is_none(){
@@ -83,7 +104,7 @@ impl Sas {
 mod tests {
     use super::*;
     #[test]
-    fn test() -> anyhow::Result<()> {
+    fn test() -> Result<(), SasError> {
         let mut sas_dm = Sas::new(Encoding::UTF8, r"sample.sas", Some("."));
         sas_dm.run()?;
         Ok(())

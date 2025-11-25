@@ -11,4 +11,5 @@ keywords = ["sas"]
 
 [dependencies]
 anyhow = "1.0.100"
+thiserror = "2.0.17"
 winreg = "0.55.0"
