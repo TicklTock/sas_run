@@ -104,8 +104,14 @@ impl Sas {
 mod tests {
     use super::*;
     #[test]
-    fn test() -> Result<(), SasError> {
+    fn test_u8() -> Result<(), SasError> {
         let mut sas_dm = Sas::new(Encoding::UTF8, r"sample.sas", Some("."));
+        sas_dm.run()?;
+        Ok(())
+    }
+    #[test]
+    fn test_zh() -> Result<(), SasError> {
+        let mut sas_dm = Sas::new(Encoding::EucCn, r"sample.sas", Some("."));
         sas_dm.run()?;
         Ok(())
     }

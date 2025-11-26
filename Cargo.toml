@@ -1,6 +1,6 @@
 [package]
 name = "sas_run"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 authors = ["ticktock"]
 description = "用于windows下读取注册表中的SAS路径来执行指定的SAS程序文件"
@@ -8,8 +8,11 @@ documentation = "https://docs.rs/sas_run"
 readme = "readme.md"
 license = "MIT"
 keywords = ["sas"]
+repository = "https://github.com/TicklTock/sas_run"
 
 [dependencies]
 anyhow = "1.0.100"
 thiserror = "2.0.17"
+
+[target.'cfg(windows)'.dependencies]
 winreg = "0.55.0"

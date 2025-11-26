@@ -9,6 +9,6 @@
 # 示例
 
 ```rust
-let mut sas_dm = Sas::new(Encoding::UTF8, r"sample.sas", None);
-sas_dm.run()?;
+let mut sas = Sas::new(Encoding::UTF8, r"sample.sas", None);
+sas.run()?;
 ```
