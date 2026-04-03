@@ -77,6 +77,7 @@ impl Sas {
         
         self.cmd
             .raw_arg("/c")
+            .raw_arg("chcp 65001 >nul &")
             .raw_arg("start")
             .raw_arg("/w")
             .arg("sas batch")
@@ -122,6 +123,7 @@ impl Sas {
         
         cmd
             .raw_arg("/c")
+            .raw_arg("chcp 65001 >nul &")
             .raw_arg("start")
             .raw_arg("/w")
             .arg("sas batch")
