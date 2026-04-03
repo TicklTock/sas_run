@@ -3,6 +3,7 @@ use std::{os::windows::process::CommandExt, process::Command, fmt::Debug};
 use thiserror::Error;
 use winreg::enums::*;
 use winreg::RegKey;
+use tokio::process::Command as TokioCommand;
 
 
 #[derive(Error)]
@@ -32,7 +33,7 @@ pub struct Sas{
 }
 
 impl Sas {
-    pub fn new<T: AsRef<Path>>(encoding: Encoding, sas_path: T, log_path: Option<T>) -> Self{
+    pub fn new<T: AsRef<Path>, U: AsRef<Path>>(encoding: Encoding, sas_path: T, log_path: Option<U>) -> Self{
         let config_path = {
             match encoding {
                 Encoding::UTF8 => Path::join(Path::new(&Sas::get_sas_path()), r"nls\u8\sasv9.cfg"),
@@ -91,6 +92,52 @@ impl Sas {
         self.cmd.output()?;
         Ok(())
     }
+    // 异步run
+    pub async fn run_async(&mut self) -> Result<(), SasError> {
+        
+
+        let mut cmd = TokioCommand::new("cmd.exe");
+        let config_path = self.config_path.to_str().unwrap();
+        let sas_path = self.sas_path.to_str().unwrap();
+
+        if !std::fs::exists(config_path)? {
+            return Err(SasError::IoError(std::io::Error::new(std::io::ErrorKind::NotFound, format!("SAS config file not found: {}", config_path))));
+        }
+
+        if !std::fs::exists(sas_path)? {
+            return Err(SasError::IoError(std::io::Error::new(std::io::ErrorKind::NotFound, format!("SAS file not found: {}", sas_path))));
+        }
+
+        let log_args = {
+            if self.log_path.is_none(){
+                format!("-NOLOG")
+            }else{
+                let path = self.log_path.clone().unwrap();
+                if !std::fs::exists(&path)? {
+                    std::fs::create_dir(&path)?;
+                }
+                format!("-LOG {}", path.to_str().unwrap())
+            }
+        };
+        
+        cmd
+            .raw_arg("/c")
+            .raw_arg("start")
+            .raw_arg("/w")
+            .arg("sas batch")
+            .raw_arg("sas")
+            .raw_arg("-CONFIG")
+            .arg(config_path)
+            .raw_arg("-SYSIN")
+            .arg(sas_path)
+            .raw_arg(log_args)
+            .raw_arg("-nosplash")
+            .raw_arg("-nologo")
+            .raw_arg("-icon");
+        cmd.output().await?;
+        Ok(())
+    }
+
     pub fn get_sas_path() -> String {
         let hklm = RegKey::predef(HKEY_CLASSES_ROOT);
         let cur_sas = hklm.open_subkey("SAS.Application\\shell\\Open\\Command").unwrap();
