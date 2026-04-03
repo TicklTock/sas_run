@@ -17,11 +17,13 @@ impl Debug for SasError {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Encoding {
     UTF8,
     EucCn,
 }
 
+#[derive(Debug)]
 pub struct Sas{
     cmd: Command,
     config_path: PathBuf,
