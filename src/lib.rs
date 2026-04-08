@@ -53,7 +53,7 @@ impl Sas {
     }
     pub fn run(&mut self) -> Result<(), SasError> {
         let config_path = self.config_path.to_str().unwrap();
-        let sas_path = self.sas_path.to_str().unwrap();
+        let sas_path = self.sas_path.strip_prefix(r"\\?\").unwrap_or(&self.sas_path).to_str().unwrap();
 
         if !std::fs::exists(config_path)? {
             return Err(SasError::IoError(std::io::Error::new(std::io::ErrorKind::NotFound, format!("SAS config file not found: {}", config_path))));
@@ -77,7 +77,6 @@ impl Sas {
         
         self.cmd
             .raw_arg("/c")
-            .raw_arg("chcp 65001 >nul &")
             .raw_arg("start")
             .raw_arg("/w")
             .arg("sas batch")
@@ -99,7 +98,7 @@ impl Sas {
 
         let mut cmd = TokioCommand::new("cmd.exe");
         let config_path = self.config_path.to_str().unwrap();
-        let sas_path = self.sas_path.to_str().unwrap();
+        let sas_path = self.sas_path.strip_prefix(r"\\?\").unwrap_or(&self.sas_path).to_str().unwrap();
 
         if !std::fs::exists(config_path)? {
             return Err(SasError::IoError(std::io::Error::new(std::io::ErrorKind::NotFound, format!("SAS config file not found: {}", config_path))));
@@ -123,7 +122,6 @@ impl Sas {
         
         cmd
             .raw_arg("/c")
-            .raw_arg("chcp 65001 >nul &")
             .raw_arg("start")
             .raw_arg("/w")
             .arg("sas batch")
@@ -156,14 +154,35 @@ mod tests {
     use super::*;
     #[test]
     fn test_u8() -> Result<(), SasError> {
-        let mut sas_dm = Sas::new(Encoding::UTF8, r"sample.sas", Some("."));
+        let path = PathBuf::from(r".\test\sample.sas");
+        let mut sas_dm = Sas::new(Encoding::UTF8, path, Some("test"));
         sas_dm.run()?;
         Ok(())
     }
+    
     #[test]
     fn test_zh() -> Result<(), SasError> {
-        let mut sas_dm = Sas::new(Encoding::EucCn, r"sample.sas", Some("."));
+
+        let mut sas_dm = Sas::new(Encoding::EucCn, r".\test\sample.sas", Some("test"));
         sas_dm.run()?;
+        Ok(())
+    }
+    
+    #[test]
+    fn test_u8_async() -> Result<(), SasError> {
+        let mut sas_dm = Sas::new(Encoding::UTF8, r".\test\sample.sas", Some("test"));
+        tokio::runtime::Builder::new_current_thread().enable_all().build().unwrap().block_on(async {
+            sas_dm.run_async().await
+        })?;        
+        Ok(())
+    }
+
+    #[test]
+    fn test_zh_async() -> Result<(), SasError> {
+        let mut sas_dm = Sas::new(Encoding::EucCn, r".\test\sample.sas", Some("test"));
+        tokio::runtime::Builder::new_current_thread().enable_all().build().unwrap().block_on(async {
+            sas_dm.run_async().await
+        })?;        
         Ok(())
     }
 }
