@@ -1,6 +1,6 @@
 [package]
 name = "sas_run"
-version = "0.1.6"
+version = "0.1.7"
 edition = "2024"
 authors = ["ticktock"]
 description = "用于windows下读取注册表中的SAS路径来执行指定的SAS程序文件"
@@ -12,6 +12,8 @@ repository = "https://github.com/TicklTock/sas_run"
 
 [dependencies]
 anyhow = "1.0.102"
+serde = "1.0.228"
+serde_derive = "1.0.228"
 thiserror = "2.0.18"
 tokio = { version = "1.50.0", features = ["process", "rt"] }
 winreg = "0.56.0"

@@ -1,9 +1,11 @@
 use std::path::{Path, PathBuf};
 use std::{os::windows::process::CommandExt, process::Command, fmt::Debug};
+use serde_derive::{Deserialize, Serialize};
 use thiserror::Error;
 use winreg::enums::*;
 use winreg::RegKey;
 use tokio::process::Command as TokioCommand;
+
 
 
 #[derive(Error)]
@@ -18,7 +20,7 @@ impl Debug for SasError {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Hash, Serialize, Deserialize)]
 pub enum Encoding {
     UTF8,
     EucCn,
@@ -167,7 +169,7 @@ mod tests {
         sas_dm.run()?;
         Ok(())
     }
-    
+
     #[test]
     fn test_u8_async() -> Result<(), SasError> {
         let mut sas_dm = Sas::new(Encoding::UTF8, r".\test\sample.sas", Some("test"));
